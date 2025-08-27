@@ -14,16 +14,17 @@ function formatTime(seconds) {
 async function getSongs(folder) {
     currFolder = folder
     // Use GitHub API to fetch repository contents
-    let a = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/${folder}`)
+    let a = await fetch(`${folder}`)
     let response = await a.json()
-    // console.log(response)
+    let div = document.createElement("div")
+    div.innerHTML = response;
+    let as = div.getElementsByTagName("a")
     songs = []
-    let songNames = []
     // Process GitHub API response
     for (let i = 0; i < response.length; i++) {
         const file = response[i];
         if (file.name.endsWith(".mp3")) {
-            songs.push(file.name)
+             songs.push(element.href.split(`/${folder}/`)[1])
         }
     }
     let songul = document.querySelector(".songlist").getElementsByTagName("ul")[0]
@@ -58,7 +59,7 @@ function playmusic(song, pause) {
     if (!song) return; // Add check for undefined song
     
     // Use GitHub raw content URL for playing songs
-    currentSong.src = `https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/${currFolder}/${song}`
+    currentSong.src = `${currFolder}/${song}`
     if (!pause) {
         currentSong.play()
         play.src = "img/pause.svg"
@@ -82,7 +83,7 @@ async function displayAlbums() {
         if (folder.type === "dir") {
             let folderName = folder.name;
             // Fetch info.json for each folder
-            let infoResponse = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/${folderName}/info.json`)
+            let infoResponse = await fetch(`/songs/${folderName}/info.json`)
             let infoData = await infoResponse.json()
             // Decode base64 content of info.json
             let infoContent = JSON.parse(atob(infoData.content))
@@ -105,7 +106,7 @@ async function displayAlbums() {
     }
     Array.from(document.getElementsByClassName('card')).forEach((e) => {
         e.addEventListener("click", async item => {
-            songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`)
+            songs = await getSongs(`/songs/${item.currentTarget.dataset.folder}`)
             if (songs && songs.length > 0) {
                 playmusic(songs[0])
             }
@@ -128,10 +129,10 @@ async function main() {
     play.addEventListener("click", () => {
         if (currentSong.paused) {
             currentSong.play()
-            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/pause.svg"
+            play.src = "img/pause.svg"
         } else {
             currentSong.pause()
-            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/play.svg"
+            play.src = "img/play.svg"
         }
     })
 
@@ -140,7 +141,7 @@ async function main() {
         document.querySelector(".songtime").innerHTML = `${formatTime(Math.floor(currentSong.currentTime))} / ${formatTime(Math.floor(currentSong.duration))}`
         document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%"
         if (currentSong.currentTime == currentSong.duration) {
-            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/play.svg"
+            play.src = "img/play.svg"
         }
     })
 

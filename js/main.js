@@ -13,19 +13,17 @@ function formatTime(seconds) {
 
 async function getSongs(folder) {
     currFolder = folder
-    let a = await fetch(`/${folder}/`)
-    let response = await a.text()
+    // Use GitHub API to fetch repository contents
+    let a = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/${folder}`)
+    let response = await a.json()
     // console.log(response)
-    let div = document.createElement("div")
-    div.innerHTML = response
-    let as = div.getElementsByTagName("a")
-    // console.log(as);
     songs = []
     let songNames = []
-    for (let i = 0; i < as.length; i++) {
-        const e = as[i];
-        if (e.href.endsWith(".mp3")) {
-            songs.push(e.href.split(`/${folder}/`)[1])
+    // Process GitHub API response
+    for (let i = 0; i < response.length; i++) {
+        const file = response[i];
+        if (file.name.endsWith(".mp3")) {
+            songs.push(file.name)
         }
     }
     let songul = document.querySelector(".songlist").getElementsByTagName("ul")[0]
@@ -59,7 +57,8 @@ function playmusic(song, pause) {
     // let audio = new Audio(`songs/${song}`);
     if (!song) return; // Add check for undefined song
     
-    currentSong.src = `${currFolder}/${song}`
+    // Use GitHub raw content URL for playing songs
+    currentSong.src = `https://raw.githubusercontent.com/Aadiraj-Arora/beatz/main/${currFolder}/${song}`
     if (!pause) {
         currentSong.play()
         play.src = "img/pause.svg"
@@ -72,20 +71,22 @@ function playmusic(song, pause) {
 }
 
 async function displayAlbums() {
-    let a = await fetch(`/songs/`)
-    let response = await a.text()
-    let div = document.createElement("div")
-    div.innerHTML = response
-    let anchors = div.getElementsByTagName("a")
+    // Use GitHub API to fetch repository contents for songs directory
+    let a = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs`)
+    let response = await a.json()
     let cardcont = document.querySelector(".cardcont")
-    let array  = Array.from(anchors)
-    for (let index = 0; index < array.length; index++) {
-        const e = array[index];  
-        if (e.href.includes("/songs")) {
-            let folders = e.href.split("/")[4];
-            let a = await fetch(`/songs/${folders}/info.json`)
-            let response = await a.json()
-            cardcont.innerHTML = cardcont.innerHTML + `<div data-folder="${folders}" class="card pointer rounded">
+    
+    // Process each folder in the songs directory
+    for (let index = 0; index < response.length; index++) {
+        const folder = response[index];
+        if (folder.type === "dir") {
+            let folderName = folder.name;
+            // Fetch info.json for each folder
+            let infoResponse = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/${folderName}/info.json`)
+            let infoData = await infoResponse.json()
+            // Decode base64 content of info.json
+            let infoContent = JSON.parse(atob(infoData.content))
+            cardcont.innerHTML = cardcont.innerHTML + `<div data-folder="${folderName}" class="card pointer rounded">
                         <div class="play">
                             <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"
                                 class="e-9640-icon" viewBox="0 0 24 24">
@@ -94,10 +95,10 @@ async function displayAlbums() {
                                     </path>
                                     </svg>
                                     </div>
-                                    <img src="/songs/${folders}/cover.png"
+                                    <img src="https://raw.githubusercontent.com/Aadiraj-Arora/beatz/main/songs/${folderName}/cover.png"
                                     alt="Be Happy" class="rounded">
-                                    <h2>${response.title}</h2>
-                                    <p>${response.description}</p>
+                                    <h2>${infoContent.title}</h2>
+                                    <p>${infoContent.description}</p>
                                     </div>`
 
         }
@@ -105,7 +106,9 @@ async function displayAlbums() {
     Array.from(document.getElementsByClassName('card')).forEach((e) => {
         e.addEventListener("click", async item => {
             songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`)
-            playmusic(songs[0])
+            if (songs && songs.length > 0) {
+                playmusic(songs[0])
+            }
         })
     })
 }
@@ -113,7 +116,9 @@ async function displayAlbums() {
 async function main() {
 
     await getSongs("songs/cs")
-    playmusic(songs[0], true)
+    if (songs && songs.length > 0) {
+        playmusic(songs[0], true)
+    }
     // console.log(songs);
 
     displayAlbums()

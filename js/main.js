@@ -116,7 +116,7 @@ async function displayAlbums() {
 
 async function main() {
 
-    await getSongs("songs/cs")
+    await getSongs("/songs/cs")
     if (songs && songs.length > 0) {
         playmusic(songs[0], true)
     }

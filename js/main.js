@@ -13,7 +13,7 @@ function formatTime(seconds) {
 
 async function getSongs(folder) {
     currFolder = folder
-    let a = await fetch(`http://127.0.0.1:3000/${folder}/`)
+    let a = await fetch(`/${folder}/`)
     let response = await a.text()
     // console.log(response)
     let div = document.createElement("div")
@@ -57,17 +57,22 @@ async function getSongs(folder) {
 
 function playmusic(song, pause) {
     // let audio = new Audio(`songs/${song}`);
+    if (!song) return; // Add check for undefined song
+    
     currentSong.src = `${currFolder}/${song}`
     if (!pause) {
         currentSong.play()
         play.src = "img/pause.svg"
     }
-    document.querySelector(".songinfo").innerHTML = decodeURI(song.split(".mp3")[0])
-
+    
+    // Add check before splitting
+    if (song && typeof song === 'string') {
+        document.querySelector(".songinfo").innerHTML = decodeURI(song.split(".mp3")[0])
+    }
 }
 
 async function displayAlbums() {
-    let a = await fetch(`http://127.0.0.1:3000/songs/`)
+    let a = await fetch(`/songs/`)
     let response = await a.text()
     let div = document.createElement("div")
     div.innerHTML = response
@@ -78,7 +83,7 @@ async function displayAlbums() {
         const e = array[index];  
         if (e.href.includes("/songs")) {
             let folders = e.href.split("/")[4];
-            let a = await fetch(`http://127.0.0.1:3000/songs/${folders}/info.json`)
+            let a = await fetch(`/songs/${folders}/info.json`)
             let response = await a.json()
             cardcont.innerHTML = cardcont.innerHTML + `<div data-folder="${folders}" class="card pointer rounded">
                         <div class="play">

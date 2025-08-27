@@ -58,7 +58,7 @@ function playmusic(song, pause) {
     if (!song) return; // Add check for undefined song
     
     // Use GitHub raw content URL for playing songs
-    currentSong.src = `https://raw.githubusercontent.com/Aadiraj-Arora/beatz/main/${currFolder}/${song}`
+    currentSong.src = `https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/${currFolder}/${song}`
     if (!pause) {
         currentSong.play()
         play.src = "img/pause.svg"
@@ -72,7 +72,7 @@ function playmusic(song, pause) {
 
 async function displayAlbums() {
     // Use GitHub API to fetch repository contents for songs directory
-    let a = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs`)
+    let a = await fetch(`https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/`)
     let response = await a.json()
     let cardcont = document.querySelector(".cardcont")
     
@@ -95,7 +95,7 @@ async function displayAlbums() {
                                     </path>
                                     </svg>
                                     </div>
-                                    <img src="https://raw.githubusercontent.com/Aadiraj-Arora/beatz/main/songs/${folderName}/cover.png"
+                                    <img src="https://api.github.com/repos/Aadiraj-Arora/beatz/contents/songs/${folderName}/cover.png"
                                     alt="Be Happy" class="rounded">
                                     <h2>${infoContent.title}</h2>
                                     <p>${infoContent.description}</p>
@@ -128,10 +128,10 @@ async function main() {
     play.addEventListener("click", () => {
         if (currentSong.paused) {
             currentSong.play()
-            play.src = "img/pause.svg"
+            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/pause.svg"
         } else {
             currentSong.pause()
-            play.src = "img/play.svg"
+            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/play.svg"
         }
     })
 
@@ -140,7 +140,7 @@ async function main() {
         document.querySelector(".songtime").innerHTML = `${formatTime(Math.floor(currentSong.currentTime))} / ${formatTime(Math.floor(currentSong.duration))}`
         document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%"
         if (currentSong.currentTime == currentSong.duration) {
-            play.src = "img/play.svg"
+            play.src = "https://api.github.com/repos/Aadiraj-Arora/beatz/contents/img/play.svg"
         }
     })
 
